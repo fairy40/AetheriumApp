@@ -1,0 +1,36 @@
+name: Build Native APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y ninja-build unzip wget cmake openjdk-11-jdk
+
+    - name: Download Android NDK
+      run: |
+        wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+        unzip android-ndk-r25c-linux.zip
+        echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+
+    - name: Build APK
+      run: |
+        cd AetheriumNexusNativeProject
+        chmod +x ./build.sh
+        ./build.sh
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: aetherium-apk
+        path: AetheriumNexusNativeProject/app/build/outputs/apk/release/*.apk
